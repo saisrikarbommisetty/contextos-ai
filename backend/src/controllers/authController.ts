@@ -28,7 +28,83 @@ export class AuthController {
           name,
           email,
           passwordHash,
-          role: role || 'Developer',
+          role: role || 'Lead Engineer',
+          avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(name)}`,
+        },
+      });
+
+      // Provision starter workspace for immediate continuity exploration
+      const starterProject = await prisma.project.create({
+        data: {
+          name: `${name.split(' ')[0]}'s Workspace`,
+          description: 'Production application continuity workspace with automated context tracking and AI recovery.',
+          status: 'In Progress',
+          progress: 55,
+          ownerId: user.id,
+        },
+      });
+
+      // Create starter tasks
+      await prisma.task.createMany({
+        data: [
+          {
+            title: 'Initialize repository and CI deployment pipeline',
+            description: 'Set up Vite, TypeScript, and automated testing workflows.',
+            status: 'COMPLETED',
+            priority: 'HIGH',
+            projectId: starterProject.id,
+            assigneeId: user.id,
+          },
+          {
+            title: 'Implement Core Authentication & User Session Management',
+            description: 'Implement JWT session security and role-based permissions.',
+            status: 'IN_PROGRESS',
+            priority: 'HIGH',
+            projectId: starterProject.id,
+            assigneeId: user.id,
+          },
+          {
+            title: 'Resolve Staging Environment CORS & Secret Configuration',
+            description: 'Staging build failed due to missing environment secrets in hosting dashboard.',
+            status: 'BLOCKED',
+            priority: 'CRITICAL',
+            projectId: starterProject.id,
+            assigneeId: user.id,
+          },
+        ],
+      });
+
+      // Create starter decision
+      await prisma.decision.create({
+        data: {
+          title: 'ADR-01: Adopt JWT Auth & Modular AI Context Layer',
+          description: 'Decided on stateless JWT tokens for zero-downtime scaling and Google Gemini fallback architecture.',
+          rationale: 'Provides instant context recovery and high availability across user sessions.',
+          status: 'ACCEPTED',
+          madeBy: name,
+          projectId: starterProject.id,
+        },
+      });
+
+      // Create starter document
+      await prisma.document.create({
+        data: {
+          title: 'System Architecture & Continuity Protocol',
+          description: 'Technical specification for context reconstruction, entity relationship graphs, and AI handovers.',
+          type: 'SPECIFICATION',
+          url: 'https://docs.contextos.ai/specs/v1',
+          projectId: starterProject.id,
+        },
+      });
+
+      // Create starter activity
+      await prisma.activity.create({
+        data: {
+          type: 'PROJECT_CREATED',
+          title: 'Initialized ContextOS Workspace',
+          description: `Welcome to ContextOS! Your continuity layer is active for ${starterProject.name}.`,
+          projectId: starterProject.id,
+          actorId: user.id,
         },
       });
 

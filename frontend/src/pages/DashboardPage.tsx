@@ -137,16 +137,35 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {data.userProjects.map((proj) => (
-            <ProjectCard
-              key={proj.id}
-              project={proj}
-              onResume={onResumeProject}
-              onOpenWorkspace={onOpenProject}
-            />
-          ))}
-        </div>
+        {data.userProjects.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {data.userProjects.map((proj) => (
+              <ProjectCard
+                key={proj.id}
+                project={proj}
+                onResume={onResumeProject}
+                onOpenWorkspace={onOpenProject}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="p-10 rounded-2xl glass-panel border border-dashed border-border text-center space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-brand-500/10 border border-brand-500/20 text-brand-400 flex items-center justify-center mx-auto">
+              <FolderGit2 className="w-6 h-6" />
+            </div>
+            <h3 className="text-sm font-bold text-white">No active workspaces yet</h3>
+            <p className="text-xs text-slate-400 max-w-sm mx-auto">
+              Create your first project to start automated context recovery, decision logging, and AI continuity briefs.
+            </p>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-brand-500/20 mt-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Create Project</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Cross-Project Recent Activity Feed */}
