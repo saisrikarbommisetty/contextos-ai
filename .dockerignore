@@ -1,0 +1,7 @@
+node_modules
+dist
+.git
+.env
+*.log
+backend/dev.db
+backend/dev.db-journal

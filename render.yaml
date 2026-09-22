@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: contextos-api
+    env: node
+    rootDir: backend
+    plan: free
+    buildCommand: "npm install && npm run prisma:generate && npm run build"
+    startCommand: "npm run prisma:push && npm run seed && npm start"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: file:./dev.db
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DEMO_MODE
+        value: "false"
+      - key: AI_PROVIDER
+        value: "gemini"
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CLIENT_URL
+        sync: false

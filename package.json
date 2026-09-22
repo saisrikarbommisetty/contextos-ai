@@ -1,0 +1,21 @@
+{
+  "name": "contextos-platform",
+  "version": "1.0.0",
+  "description": "ContextOS - AI-Powered Context Recovery & Work Continuity Platform",
+  "private": true,
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build": "npm --prefix backend run build && npm --prefix frontend run build",
+    "seed": "npm --prefix backend run seed",
+    "test": "npm --prefix backend test"
+  },
+  "keywords": [
+    "contextos",
+    "ai",
+    "context-recovery",
+    "continuity"
+  ],
+  "author": "ContextOS Team",
+  "license": "MIT"
+}

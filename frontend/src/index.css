@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #0a0d14;
+    --surface-100: #181d2a;
+    --surface-200: #131722;
+    --surface-300: #0e121b;
+  }
+
+  body {
+    background-color: #0a0d14;
+    color: #f1f5f9;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Custom sleek dark scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0a0d14;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #1f2638;
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #313b52;
+  }
+}
+
+@layer utilities {
+  .glass-card {
+    background: rgba(19, 23, 34, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .glass-panel {
+    background: rgba(14, 18, 27, 0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .glow-border {
+    position: relative;
+  }
+
+  .glow-border::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(6, 182, 212, 0.2), transparent 70%);
+    border-radius: inherit;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .glow-hero-btn {
+    box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.5), 0 0 10px -2px rgba(6, 182, 212, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .glow-hero-btn:hover {
+    box-shadow: 0 0 35px 0px rgba(99, 102, 241, 0.7), 0 0 15px 0px rgba(6, 182, 212, 0.5);
+    transform: translateY(-1px);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-brand-gradient {
+    background: linear-gradient(135deg, #818cf8 0%, #6366f1 50%, #06b6d4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
