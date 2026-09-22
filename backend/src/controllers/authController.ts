@@ -79,8 +79,6 @@ export class AuthController {
         data: {
           title: 'ADR-01: Adopt JWT Auth & Modular AI Context Layer',
           description: 'Decided on stateless JWT tokens for zero-downtime scaling and Google Gemini fallback architecture.',
-          rationale: 'Provides instant context recovery and high availability across user sessions.',
-          status: 'ACCEPTED',
           madeBy: name,
           projectId: starterProject.id,
         },
