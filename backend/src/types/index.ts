@@ -146,6 +146,7 @@ export interface ResumeBriefing {
     status: string;
     summary: string;
   };
+  aiSource?: 'gemini' | 'openai' | 'fallback';
 }
 
 export interface ProjectContextBrief {
@@ -182,6 +183,7 @@ export interface ProjectContextBrief {
     type: string;
   }>;
   recommendedStartingPoint: string;
+  aiSource?: 'gemini' | 'openai' | 'fallback';
 }
 
 export interface GraphNode {

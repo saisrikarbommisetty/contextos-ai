@@ -73,6 +73,10 @@ export const projectApi = {
     const res = await api.get('/projects');
     return res.data.data;
   },
+  getAllProjects: async (): Promise<ProjectCardData[]> => {
+    const res = await api.get('/projects');
+    return res.data.data;
+  },
   createProject: async (data: { name: string; description: string; status?: string }): Promise<FullProject> => {
     const res = await api.post('/projects', data);
     return res.data.data;

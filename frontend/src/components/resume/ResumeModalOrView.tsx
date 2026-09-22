@@ -174,10 +174,25 @@ export const ResumeModalOrView: React.FC<ResumeModalOrViewProps> = ({
             {/* Briefing Header Banner */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold mb-2">
-                  <Check className="w-3.5 h-3.5" />
-                  <span>Context Ready • 100% Reconstructed</span>
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Context Ready • 100% Reconstructed</span>
+                  </div>
+
+                  {briefing.aiSource === 'gemini' ? (
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-brand-600/30 to-indigo-600/30 border border-brand-500/40 text-brand-300 text-xs font-semibold shadow-sm">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+                      <span>Google Gemini 3.1 Live AI</span>
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Deterministic Continuity Engine (Fallback Mode)</span>
+                    </div>
+                  )}
                 </div>
+
                 <h2 className="text-2xl font-black text-white tracking-tight">
                   Welcome back to <span className="text-brand-gradient">{briefing.projectName}</span>
                 </h2>

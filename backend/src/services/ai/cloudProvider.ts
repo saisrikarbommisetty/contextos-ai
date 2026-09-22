@@ -55,22 +55,28 @@ You MUST return a strictly valid JSON object adhering EXACTLY to this schema (no
         const parsed = JSON.parse(cleaned);
         if (parsed.projectState && parsed.lastWorkingPoint && parsed.recommendedContinuation) {
           console.log(`[ContextOS AI] ✨ Gemini live context reconstructed for project: "${pkg.projectName}"`);
-          return parsed;
+          return {
+            ...parsed,
+            aiSource: 'gemini',
+          };
         }
       }
 
       console.warn('[CloudLLMProvider] Live AI output was incomplete, using fallback.');
-      return await this.fallbackProvider.generateResumeBriefing(pkg);
+      const fallbackResult = await this.fallbackProvider.generateResumeBriefing(pkg);
+      return { ...fallbackResult, aiSource: 'fallback' };
     } catch (err: any) {
       console.warn('[CloudLLMProvider] Cloud LLM execution failed, falling back to DemoAIProvider:', err.message || err);
-      return await this.fallbackProvider.generateResumeBriefing(pkg);
+      const fallbackResult = await this.fallbackProvider.generateResumeBriefing(pkg);
+      return { ...fallbackResult, aiSource: 'fallback' };
     }
   }
 
   public async generateProjectBrief(pkg: ContextPackage): Promise<ProjectContextBrief> {
     try {
       if (process.env.DEMO_MODE === 'true' || !this.apiKey) {
-        return await this.fallbackProvider.generateProjectBrief(pkg);
+        const fallbackResult = await this.fallbackProvider.generateProjectBrief(pkg);
+        return { ...fallbackResult, aiSource: 'fallback' };
       }
 
       const prompt = `You are ContextOS. Generate a comprehensive Project Handover Brief for onboarding teammates or project takeovers.
@@ -99,14 +105,19 @@ Return ONLY a valid JSON object matching this schema:
         const parsed = JSON.parse(cleaned);
         if (parsed.projectOverview && parsed.currentState) {
           console.log(`[ContextOS AI] ✨ Gemini live handover brief generated for project: "${pkg.projectName}"`);
-          return parsed;
+          return {
+            ...parsed,
+            aiSource: 'gemini',
+          };
         }
       }
 
-      return await this.fallbackProvider.generateProjectBrief(pkg);
+      const fallbackResult = await this.fallbackProvider.generateProjectBrief(pkg);
+      return { ...fallbackResult, aiSource: 'fallback' };
     } catch (err: any) {
       console.warn('[CloudLLMProvider] Cloud LLM project brief failed, falling back to DemoAIProvider:', err.message || err);
-      return await this.fallbackProvider.generateProjectBrief(pkg);
+      const fallbackResult = await this.fallbackProvider.generateProjectBrief(pkg);
+      return { ...fallbackResult, aiSource: 'fallback' };
     }
   }
 
