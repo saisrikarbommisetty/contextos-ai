@@ -334,8 +334,8 @@ ContextOS/
 
 ## 👥 Team & Acknowledgements
 
-Built with ❤️ for the AI Hackathon.  
-**Lead Engineer**: Sai Krishna Bommisetty  
+Built for the AI Hackathon.  
+**Lead Engineer**: Sai Srikar Bommisetty  
 **Platform**: ContextOS — AI-Powered Context Recovery & Work Continuity
 
 ---
