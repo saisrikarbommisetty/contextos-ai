@@ -7,7 +7,9 @@ import {
   ArrowLeft,
   CheckCircle2,
   Clock,
-  User as UserIcon
+  User as UserIcon,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import { FullProject } from '../../types';
 import { ContextHealthBadge } from '../common/ContextHealthBadge';
@@ -19,6 +21,8 @@ interface ProjectHeaderProps {
   onResumeClick: () => void;
   onGenerateBriefClick: () => void;
   onBackToDashboard: () => void;
+  onEditProject?: () => void;
+  onDeleteProject?: () => void;
 }
 
 export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
@@ -28,6 +32,8 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
   onResumeClick,
   onGenerateBriefClick,
   onBackToDashboard,
+  onEditProject,
+  onDeleteProject,
 }) => {
   const tabs = [
     { id: 'overview', label: 'Overview' },
@@ -82,7 +88,27 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
         </div>
 
         {/* Hero Actions */}
-        <div className="flex items-center gap-3 shrink-0 flex-wrap">
+        <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+          {onEditProject && (
+            <button
+              onClick={onEditProject}
+              title="Edit Project"
+              className="p-2.5 rounded-xl bg-surface-100 hover:bg-surface-50 border border-border text-slate-300 hover:text-white text-xs transition-all"
+            >
+              <Edit2 className="w-4 h-4" />
+            </button>
+          )}
+
+          {onDeleteProject && (
+            <button
+              onClick={onDeleteProject}
+              title="Delete Project"
+              className="p-2.5 rounded-xl bg-surface-100 hover:bg-rose-500/20 border border-border hover:border-rose-500/40 text-slate-300 hover:text-rose-400 text-xs transition-all"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+
           <button
             onClick={onGenerateBriefClick}
             className="px-4 py-2.5 rounded-xl bg-surface-100 hover:bg-surface-50 border border-border text-slate-200 hover:text-white text-xs font-semibold flex items-center gap-2 transition-all"

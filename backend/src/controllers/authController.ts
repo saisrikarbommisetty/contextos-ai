@@ -7,16 +7,42 @@ import { AuthRequest } from '../types';
 const JWT_SECRET = process.env.JWT_SECRET || 'contextos_jwt_secure_secret_key_hackathon_2026';
 
 export class AuthController {
+  /**
+   * Real User Registration
+   * Validates credentials, checks uniqueness, hashes password, creates user in database
+   */
   public static async register(req: Request, res: Response): Promise<void> {
     try {
-      const { name, email, password, role } = req.body;
+      const { name, email, password, confirmPassword, role } = req.body;
 
-      if (!email || !password || !name) {
-        res.status(400).json({ success: false, error: 'Name, email, and password are required.' });
+      if (!name || !name.trim()) {
+        res.status(400).json({ success: false, error: 'Full name is required.' });
         return;
       }
 
-      const existing = await prisma.user.findUnique({ where: { email } });
+      if (!email || !email.trim()) {
+        res.status(400).json({ success: false, error: 'Email address is required.' });
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.trim())) {
+        res.status(400).json({ success: false, error: 'Please enter a valid email address.' });
+        return;
+      }
+
+      if (!password || password.length < 6) {
+        res.status(400).json({ success: false, error: 'Password must be at least 6 characters long.' });
+        return;
+      }
+
+      if (confirmPassword !== undefined && password !== confirmPassword) {
+        res.status(400).json({ success: false, error: 'Passwords do not match.' });
+        return;
+      }
+
+      const normalizedEmail = email.trim().toLowerCase();
+      const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
       if (existing) {
         res.status(409).json({ success: false, error: 'An account with this email already exists.' });
         return;
@@ -25,84 +51,11 @@ export class AuthController {
       const passwordHash = await bcrypt.hash(password, 10);
       const user = await prisma.user.create({
         data: {
-          name,
-          email,
+          name: name.trim(),
+          email: normalizedEmail,
           passwordHash,
-          role: role || 'Lead Engineer',
-          avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(name)}`,
-        },
-      });
-
-      // Provision starter workspace for immediate continuity exploration
-      const starterProject = await prisma.project.create({
-        data: {
-          name: `${name.split(' ')[0]}'s Workspace`,
-          description: 'Production application continuity workspace with automated context tracking and AI recovery.',
-          status: 'In Progress',
-          progress: 55,
-          ownerId: user.id,
-        },
-      });
-
-      // Create starter tasks
-      await prisma.task.createMany({
-        data: [
-          {
-            title: 'Initialize repository and CI deployment pipeline',
-            description: 'Set up Vite, TypeScript, and automated testing workflows.',
-            status: 'COMPLETED',
-            priority: 'HIGH',
-            projectId: starterProject.id,
-            assigneeId: user.id,
-          },
-          {
-            title: 'Implement Core Authentication & User Session Management',
-            description: 'Implement JWT session security and role-based permissions.',
-            status: 'IN_PROGRESS',
-            priority: 'HIGH',
-            projectId: starterProject.id,
-            assigneeId: user.id,
-          },
-          {
-            title: 'Resolve Staging Environment CORS & Secret Configuration',
-            description: 'Staging build failed due to missing environment secrets in hosting dashboard.',
-            status: 'BLOCKED',
-            priority: 'CRITICAL',
-            projectId: starterProject.id,
-            assigneeId: user.id,
-          },
-        ],
-      });
-
-      // Create starter decision
-      await prisma.decision.create({
-        data: {
-          title: 'ADR-01: Adopt JWT Auth & Modular AI Context Layer',
-          description: 'Decided on stateless JWT tokens for zero-downtime scaling and Google Gemini fallback architecture.',
-          madeBy: name,
-          projectId: starterProject.id,
-        },
-      });
-
-      // Create starter document
-      await prisma.document.create({
-        data: {
-          title: 'System Architecture & Continuity Protocol',
-          description: 'Technical specification for context reconstruction, entity relationship graphs, and AI handovers.',
-          type: 'SPECIFICATION',
-          url: 'https://docs.contextos.ai/specs/v1',
-          projectId: starterProject.id,
-        },
-      });
-
-      // Create starter activity
-      await prisma.activity.create({
-        data: {
-          type: 'PROJECT_CREATED',
-          title: 'Initialized ContextOS Workspace',
-          description: `Welcome to ContextOS! Your continuity layer is active for ${starterProject.name}.`,
-          projectId: starterProject.id,
-          actorId: user.id,
+          role: role || 'Lead Full-Stack Engineer',
+          avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(name.trim())}`,
         },
       });
 
@@ -124,6 +77,10 @@ export class AuthController {
     }
   }
 
+  /**
+   * Real User Login
+   * Verifies against real hashed database credentials
+   */
   public static async login(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
@@ -133,7 +90,8 @@ export class AuthController {
         return;
       }
 
-      const user = await prisma.user.findUnique({ where: { email } });
+      const normalizedEmail = email.trim().toLowerCase();
+      const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
       if (!user) {
         res.status(401).json({ success: false, error: 'Invalid email or password.' });
         return;
@@ -163,6 +121,9 @@ export class AuthController {
     }
   }
 
+  /**
+   * Demo Account Fast Login for Hackathon Judges
+   */
   public static async demoLogin(req: Request, res: Response): Promise<void> {
     try {
       let demoUser = await prisma.user.findUnique({ where: { email: 'demo@contextos.ai' } });
@@ -204,6 +165,33 @@ export class AuthController {
       return;
     }
     res.status(200).json({ success: true, user: req.user });
+  }
+
+  public static async updateProfile(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      if (!req.user?.id) {
+        res.status(401).json({ success: false, error: 'Not authenticated.' });
+        return;
+      }
+      const { name, role } = req.body;
+      const updated = await prisma.user.update({
+        where: { id: req.user.id },
+        data: {
+          name: name ? name.trim() : undefined,
+          role: role ? role.trim() : undefined,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          avatar: true,
+        },
+      });
+      res.status(200).json({ success: true, user: updated });
+    } catch (err: any) {
+      res.status(500).json({ success: false, error: err.message });
+    }
   }
 
   public static async logout(req: Request, res: Response): Promise<void> {

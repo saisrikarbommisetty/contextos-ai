@@ -1,5 +1,5 @@
 import React from 'react';
-import { FolderGit2, ArrowRight, Sparkles, AlertCircle, Clock } from 'lucide-react';
+import { FolderGit2, ArrowRight, Sparkles, AlertCircle, Clock, Edit2, Trash2 } from 'lucide-react';
 import { ProjectCardData } from '../../types';
 import { ContextHealthBadge } from '../common/ContextHealthBadge';
 
@@ -7,15 +7,19 @@ interface ProjectCardProps {
   project: ProjectCardData;
   onResume: (projectId: string) => void;
   onOpenWorkspace: (projectId: string) => void;
+  onEdit?: (project: ProjectCardData) => void;
+  onDelete?: (projectId: string, projectName: string) => void;
 }
 
 export const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
   onResume,
   onOpenWorkspace,
+  onEdit,
+  onDelete,
 }) => {
   return (
-    <div className="group rounded-2xl glass-card hover:border-brand-500/40 p-5 transition-all duration-300 hover:shadow-xl hover:shadow-brand-500/5 flex flex-col justify-between">
+    <div className="group rounded-2xl glass-card hover:border-brand-500/40 p-5 transition-all duration-300 hover:shadow-xl hover:shadow-brand-500/5 flex flex-col justify-between relative">
       <div>
         {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-3">
@@ -32,7 +36,33 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               </span>
             </div>
           </div>
-          <ContextHealthBadge score={project.contextHealthScore} size="sm" showLabel={false} />
+          <div className="flex items-center gap-2">
+            <ContextHealthBadge score={project.contextHealthScore} size="sm" showLabel={false} />
+            {onEdit && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(project);
+                }}
+                title="Edit Project"
+                className="p-1 text-slate-500 hover:text-brand-400 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {onDelete && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(project.id, project.name);
+                }}
+                title="Delete Project"
+                className="p-1 text-slate-500 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Description */}

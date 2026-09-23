@@ -81,6 +81,10 @@ export const projectApi = {
     const res = await api.post('/projects', data);
     return res.data.data;
   },
+  updateProject: async (id: string, data: { name?: string; description?: string; status?: string; progress?: number }): Promise<FullProject> => {
+    const res = await api.patch(`/projects/${id}`, data);
+    return res.data.data;
+  },
   deleteProject: async (id: string): Promise<void> => {
     await api.delete(`/projects/${id}`);
   },

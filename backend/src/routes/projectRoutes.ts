@@ -8,10 +8,11 @@ const router = Router();
 // Apply auth middleware to all project routes
 router.use(authenticateToken);
 
-// Project list, create, details & delete
+// Project list, create, details, update & delete
 router.get('/', ProjectController.getAllProjects);
 router.post('/', ProjectController.createProject);
 router.get('/:id', ProjectController.getProjectById);
+router.patch('/:id', ProjectController.updateProject);
 router.delete('/:id', ProjectController.deleteProject);
 
 // Tasks

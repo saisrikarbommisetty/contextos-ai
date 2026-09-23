@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GitCommit, Plus, User as UserIcon, Calendar, CheckCircle } from 'lucide-react';
+import { GitCommit, Plus, User as UserIcon, Calendar, CheckCircle, Trash2 } from 'lucide-react';
 import { Decision } from '../../types';
 import { projectApi } from '../../services/api';
 
@@ -7,12 +7,14 @@ interface DecisionsTabProps {
   projectId: string;
   decisions: Decision[];
   onDecisionCreated: (decision: Decision) => void;
+  onDecisionDeleted?: (decisionId: string) => void;
 }
 
 export const DecisionsTab: React.FC<DecisionsTabProps> = ({
   projectId,
   decisions,
   onDecisionCreated,
+  onDecisionDeleted,
 }) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [title, setTitle] = useState<string>('');
@@ -39,6 +41,15 @@ export const DecisionsTab: React.FC<DecisionsTabProps> = ({
       console.error('Failed to log decision:', err);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (decisionId: string) => {
+    try {
+      await projectApi.deleteDecision(projectId, decisionId);
+      if (onDecisionDeleted) onDecisionDeleted(decisionId);
+    } catch (err) {
+      console.error('Failed to delete decision:', err);
     }
   };
 
@@ -70,7 +81,7 @@ export const DecisionsTab: React.FC<DecisionsTabProps> = ({
         {decisions.map((dec, idx) => (
           <div
             key={dec.id}
-            className="p-5 rounded-2xl glass-card border border-border hover:border-brand-500/30 transition-all"
+            className="p-5 rounded-2xl glass-card border border-border hover:border-brand-500/30 transition-all group"
           >
             <div className="flex items-start justify-between gap-4 mb-2">
               <div className="flex items-center gap-2.5">
@@ -79,10 +90,19 @@ export const DecisionsTab: React.FC<DecisionsTabProps> = ({
                 </span>
                 <h4 className="text-sm font-bold text-slate-100">{dec.title}</h4>
               </div>
-              <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1">
-                <Calendar className="w-3 h-3 text-slate-500" />
-                <span>{new Date(dec.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                  <span>{new Date(dec.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                </span>
+                <button
+                  onClick={() => handleDelete(dec.id)}
+                  title="Delete decision"
+                  className="p-1 text-slate-500 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
 
             <p className="text-xs text-slate-300 leading-relaxed pl-8 mb-3">

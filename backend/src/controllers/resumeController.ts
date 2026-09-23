@@ -12,7 +12,14 @@ export class ResumeController {
   public static async resumeWork(req: AuthRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const userId = req.user?.id || 'user-demo-01';
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(401).json({ success: false, error: 'Authentication required.' });
+        return;
+      }
+
+      // Verify project ownership / authorization
+      await ProjectService.verifyProjectAccess(id, userId);
 
       // 1. Context Engine collects and normalizes project entities & session boundaries
       const contextPackage = await ContextEngine.buildContextPackage(id, userId);
@@ -30,7 +37,7 @@ export class ResumeController {
       });
     } catch (err: any) {
       console.error('[Resume Controller Error]:', err);
-      res.status(500).json({
+      res.status(err.statusCode || 500).json({
         success: false,
         error: 'We encountered an issue reconstructing your context briefing. Please try again.',
         details: err.message,
@@ -45,7 +52,14 @@ export class ResumeController {
   public static async generateContextBrief(req: AuthRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      const userId = req.user?.id || 'user-demo-01';
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(401).json({ success: false, error: 'Authentication required.' });
+        return;
+      }
+
+      // Verify project ownership / authorization
+      await ProjectService.verifyProjectAccess(id, userId);
 
       const contextPackage = await ContextEngine.buildContextPackage(id, userId);
       const ai = getAIProvider();
@@ -56,7 +70,7 @@ export class ResumeController {
         data: brief,
       });
     } catch (err: any) {
-      res.status(500).json({
+      res.status(err.statusCode || 500).json({
         success: false,
         error: 'Failed to generate project brief: ' + err.message,
       });

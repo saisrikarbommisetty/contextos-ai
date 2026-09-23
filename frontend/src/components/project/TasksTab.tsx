@@ -7,7 +7,10 @@ import {
   ShieldAlert, 
   User as UserIcon,
   Search,
-  Filter
+  Filter,
+  Trash2,
+  Edit2,
+  X
 } from 'lucide-react';
 import { Task } from '../../types';
 import { projectApi } from '../../services/api';
@@ -17,6 +20,7 @@ interface TasksTabProps {
   tasks: Task[];
   onTaskUpdated: (updatedTask: Task) => void;
   onTaskCreated: (newTask: Task) => void;
+  onTaskDeleted?: (taskId: string) => void;
 }
 
 export const TasksTab: React.FC<TasksTabProps> = ({
@@ -24,14 +28,26 @@ export const TasksTab: React.FC<TasksTabProps> = ({
   tasks,
   onTaskUpdated,
   onTaskCreated,
+  onTaskDeleted,
 }) => {
   const [filter, setFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  
+  // Add modal
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [newTitle, setNewTitle] = useState<string>('');
   const [newDesc, setNewDesc] = useState<string>('');
   const [newPriority, setNewPriority] = useState<'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'>('HIGH');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  // Edit modal
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [editTitle, setEditTitle] = useState<string>('');
+  const [editDesc, setEditDesc] = useState<string>('');
+  const [editPriority, setEditPriority] = useState<'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'>('MEDIUM');
+  const [editStatus, setEditStatus] = useState<Task['status']>('TODO');
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
   const handleToggleStatus = async (task: Task) => {
     let nextStatus: Task['status'] = 'TODO';
@@ -68,6 +84,46 @@ export const TasksTab: React.FC<TasksTabProps> = ({
       console.error('Failed to create task:', err);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleOpenEdit = (task: Task) => {
+    setEditingTask(task);
+    setEditTitle(task.title);
+    setEditDesc(task.description || '');
+    setEditPriority(task.priority);
+    setEditStatus(task.status);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTask || !editTitle.trim()) return;
+
+    setIsUpdating(true);
+    try {
+      const updated = await projectApi.updateTask(projectId, editingTask.id, {
+        title: editTitle.trim(),
+        description: editDesc,
+        priority: editPriority,
+        status: editStatus,
+      });
+      onTaskUpdated(updated);
+      setShowEditModal(false);
+      setEditingTask(null);
+    } catch (err) {
+      console.error('Failed to update task:', err);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      await projectApi.deleteTask(projectId, taskId);
+      if (onTaskDeleted) onTaskDeleted(taskId);
+    } catch (err) {
+      console.error('Failed to delete task:', err);
     }
   };
 
@@ -212,6 +268,23 @@ export const TasksTab: React.FC<TasksTabProps> = ({
                   >
                     {statusConfig.label}
                   </button>
+
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => handleOpenEdit(task)}
+                      title="Edit Task"
+                      className="p-1.5 text-slate-500 hover:text-brand-400 transition-colors"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteTask(task.id)}
+                      title="Delete Task"
+                      className="p-1.5 text-slate-500 hover:text-rose-400 transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -276,6 +349,91 @@ export const TasksTab: React.FC<TasksTabProps> = ({
                   className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold"
                 >
                   {isSubmitting ? 'Creating...' : 'Create Task'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Task Modal */}
+      {showEditModal && editingTask && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl glass-panel border border-border p-6 shadow-2xl relative">
+            <button
+              onClick={() => setShowEditModal(false)}
+              className="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-surface-100"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <h3 className="text-base font-bold text-white mb-4">Edit Task</h3>
+            <form onSubmit={handleUpdateTask} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Task Title</label>
+                <input
+                  type="text"
+                  required
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-surface-100 border border-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Description</label>
+                <textarea
+                  rows={3}
+                  value={editDesc}
+                  onChange={(e) => setEditDesc(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-surface-100 border border-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500"
+                ></textarea>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">Priority</label>
+                  <select
+                    value={editPriority}
+                    onChange={(e) => setEditPriority(e.target.value as any)}
+                    className="w-full px-3 py-2 rounded-xl bg-surface-100 border border-border text-xs text-white focus:outline-none focus:border-brand-500"
+                  >
+                    <option value="CRITICAL">CRITICAL</option>
+                    <option value="HIGH">HIGH</option>
+                    <option value="MEDIUM">MEDIUM</option>
+                    <option value="LOW">LOW</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1">Status</label>
+                  <select
+                    value={editStatus}
+                    onChange={(e) => setEditStatus(e.target.value as any)}
+                    className="w-full px-3 py-2 rounded-xl bg-surface-100 border border-border text-xs text-white focus:outline-none focus:border-brand-500"
+                  >
+                    <option value="TODO">To Do</option>
+                    <option value="IN_PROGRESS">In Progress</option>
+                    <option value="BLOCKED">Blocked</option>
+                    <option value="COMPLETED">Completed</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 rounded-xl bg-surface-100 hover:bg-surface-50 text-slate-300 text-xs font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdating}
+                  className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold"
+                >
+                  {isUpdating ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </form>
